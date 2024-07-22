@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEARN TO CODE</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #333;
+  color: #fff;
+}
+
+.container {
+  width: 90%;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+h1, h2 {
+  color: #ffa500;
+}
+
+.logo {
+  text-align: center;
+  font-size: 3rem;
+  margin: 20px 0;
+  color: #ffa500;
+  font-weight: bold;
+}
+
+.section {
+  margin-bottom: 40px;
+}
+
+.section a {
+  color: #ffa500;
+  text-decoration: none;
+}
+
+.section a:hover {
+  text-decoration: underline;
+}
+
+.code-box {
+  background-color: #222;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin: 20px 0;
+  overflow-x: auto;
+}
+
+pre {
+  margin: 0;
+}
+
+.video-container {
+  margin-top: 20px;
+}
+
+.video {
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%;
+  position: relative;
+}
+
+.video iframe {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border: none;
+}
+
+footer {
+  text-align: center;
+  padding: 10px 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 8px;
+}
+
+.back-button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+}
+
+.back-button:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 600px) {
+  .container {
+    width: 95%;
+    padding: 10px;
+  }
+
+  .logo {
+    font-size: 2.5rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  .back-button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="back-button"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+  <div class="logo">Learn to Code</div>
+
+  <div class="section">
+    <h2>HTML</h2>
+    <p>HTML is the standard markup language for creating web pages. It stands for HyperText Markup Language and is used to structure the content on the web.</p>
+    <div class="code-box">
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Page Title&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;h1&gt;This is a Heading&lt;/h1&gt;
+&lt;p&gt;This is a paragraph.&lt;/p&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
+    <div class="video-container">
+      <div class="video">
+        <iframe src="https://www.youtube.com/embed/pQN-pnXPaVg" allowfullscreen></iframe>
+      </div>
+    </div>
+    <p>Recommended resources:</p>
+    <ul>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML" target="_blank">MDN Web Docs - HTML</a></li>
+      <li><a href="https://www.w3schools.com/html/" target="_blank">W3Schools - HTML Tutorial</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>CSS</h2>
+    <p>CSS is a language used to describe the style of an HTML document. CSS describes how HTML elements should be displayed.</p>
+    <div class="code-box">
+      <pre><code>body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+}
+
+h1 {
+  color: #ffa500;
+  text-align: center;
+}</code></pre>
+    </div>
+    <div class="video-container">
+      <div class="video">
+        <iframe src="https://www.youtube.com/embed/yfoY53QXEnI" allowfullscreen></iframe>
+      </div>
+    </div>
+    <p>Recommended resources:</p>
+    <ul>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank">MDN Web Docs - CSS</a></li>
+      <li><a href="https://www.w3schools.com/css/" target="_blank">W3Schools - CSS Tutorial</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>JavaScript</h2>
+    <p>JavaScript is a programming language that is one of the core technologies of the web, alongside HTML and CSS. It enables interactive web pages and is an essential part of web applications.</p>
+    <div class="code-box">
+      <pre><code>function greet(name) {
+  console.log('Hello, ' + name + '!');
+}
+
+greet('World');</code></pre>
+    </div>
+    <div class="video-container">
+      <div class="video">
+        <iframe src="https://www.youtube.com/embed/W6NZfCO5SIk" allowfullscreen></iframe>
+      </div>
+    </div>
+    <p>Recommended resources:</p>
+    <ul>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">MDN Web Docs - JavaScript</a></li>
+      <li><a href="https://www.w3schools.com/js/" target="_blank">W3Schools - JavaScript Tutorial</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Node.js</h2>
+    <p>Node.js is a JavaScript runtime built on Chrome's V8 JavaScript engine. It allows developers to use JavaScript to write server-side code and build scalable network applications.</p>
+    <div class="code-box">
+      <pre><code>const http = require('http');
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end('Hello, World!\n');
+});
+
+server.listen(3000, 'localhost', () => {
+  console.log('Server running at http://localhost:3000/');
+});</code></pre>
+    </div>
+    <div class="video-container">
+      <div class="video">
+        <iframe src="https://www.youtube.com/embed/TlB_eWDSMt4" allowfullscreen></iframe>
+      </div>
+    </div>
+    <p>Recommended resources:</p>
+    <ul>
+      <li><a href="https://nodejs.org/en/docs/" target="_blank">Node.js Official Documentation</a></li>
+      <li><a href="https://www.w3schools.com/nodejs/" target="_blank">W3Schools - Node.js Tutorial</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Python</h2>
+    <p>Python is a high-level, interpreted programming language known for its readability and simplicity. It is widely used in web development, data science, automation, and more.</p>
+    <div class="code-box">
+      <pre><code>print("Hello, World!")</code></pre>
+    </div>
+    <div class="video-container">
+      <div class="video">
+        <iframe src="https://www.youtube.com/embed/rfscVS0vtbw" allowfullscreen></iframe>
+      </div>
+    </div>
+    <p>Recommended resources:</p>
+    <ul>
+      <li><a href="https://docs.python.org/3/" target="_blank">Python Official Documentation</a></li>
+      <li><a href="https://www.w3schools.com/python/" target="_blank">W3Schools - Python Tutorial</a></li>
+    </ul>
+  </div>
+</div>
+<footer>
+  &copy; 2024 Joshua Apostol, All rights reserved.
+</footer>
+</body>
+</html>

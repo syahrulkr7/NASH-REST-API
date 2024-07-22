@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NASH API</title>
+<link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+</head>
+  <style>
+    .swal2-popup {
+      background-color: #1d1d1d;
+      color: #fff;
+      border: 1px solid #fff;
+    }
+
+    .swal2-title,
+    .swal2-content {
+      color: #fff;
+    }
+
+    .swal2-confirm {
+      background-color: #333 !important;
+      color: #fff !important;
+      border: 1px solid #fff !important;
+      border-radius: 5px !important;
+      padding: 10px 20px !important;
+    }
+
+    .swal2-confirm:hover {
+      background-color: #444 !important;
+    }
+
+    .swal2-cancel {
+      background-color: #444 !important;
+      color: #fff !important;
+      border: 1px solid #fff !important;
+      border-radius: 5px !important;
+      padding: 10px 20px !important;
+    }
+
+    .swal2-cancel:hover {
+      background-color: #666 !important;
+    }
+    
+    .menu .logov2 {
+     text-align: center;
+     margin-bottom: 30px;
+     animation: fadeIn 1s ease;
+    }
+
+    .menu .logov2 img {
+     height: 110px;
+     width: 100px;
+     border-radius: 50%;
+     border: 4px solid #fff;
+     padding: 10px;
+     background-color: #0f4b8a;
+     transition: transform 0.3s ease;
+    }
+
+    .menu .logov2 img:hover {
+     transform: scale(1.1);
+    }
+
+    .menu .logov2 h1 {
+     margin: 10px 0 0;
+     font-size: 1.8rem;
+     font-weight: bold;
+     color: #FF0000;
+     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+<body>
+<header>
+  <div class="logo">
+    <img src="https://i.imgur.com/Ed5YUaU.png" alt="NASH API Logo">
+    <h1>NASH API</h1>
+  </div>
+  <div class="menu-toggle" onclick="toggleMenu()">
+    <i class="fa-solid fa-bars" id="menuIcon"></i>
+  </div>
+</header>
+<div class="menu" id="menu">
+  <div class="logov2">
+    <img src="https://i.imgur.com/Ed5YUaU.png" alt="NAAHBOT Logo">
+    <h1>NASH API</h1>
+  </div>
+  <ul>
+    <li class="folder">
+      <div class="folder-header" onclick="toggleFolder('ai-apis')">
+        <i class="fa-solid fa-robot"></i> AI APIs
+      </div>
+      <div class="folder-content" id="ai-apis">
+        <a onclick="page('/gpt3?prompt=hi')">GPT 3.5</a>
+      <a onclick="page('/gpt-3_5-turbo?prompt=who made you?')">GPT-3_5-turbo</a>
+      <a onclick="page('/glm4?message=hi')">Glm4-Ai</a>
+      <a onclick="page('/freegpt4o8k?question=')">FreeGPT4o8k</a>
+      <a onclick="page('/gemini?prompt=')">Gemini</a>
+      <a onclick="page('/blackbox?chat=hi')">Blackbox</a>
+      <a onclick="page('/catgpt?q=hi')">CatGPT</a>
+      <a onclick="page('/llama-3-70b?q=who are you?')">Llama-3-70b</a>
+      <a onclick="page('/mistral?prompt=&senderID=')">Mistral</a>
+      <a onclick="page('/codegpt?type=ask&lang=nodejs&q=Rest Api End')">CodeGpt (Ask)</a>
+      <a onclick="page('/ai-gf?q=hi')">AI Girlfriend (PRO)</a>
+      </div>
+    </li>
+    <li class="folder">
+      <div class="folder-header" onclick="toggleFolder('tools-apis')">
+        <i class="fab fa-facebook"></i> Tools APIs
+      </div>
+      <div class="folder-content" id="tools-apis">
+        <a onclick="page('/autoreact?link=&type=LOVE&cookie=datr cookie')">Fb Auto React</a>
+      <a onclick="page('/token?username=&pass=')">Token Getter EAAAAU</a>
+      <a onclick="page('/api/token-cookie?username=&password=')">Token&Cookie getter</a>
+      <a onclick="page('/share?token=&amount=&url=&interval=2000&deleteAfter=3600')">Spam Share</a>
+      <a onclick="page('/ngl?username=example&message=messagemo&deviceId=myDevice&amount=5')">NGL API</a>
+        <a onclick="page('/ngl?username=${username}&category=${category}&amount=${amount}')">RANDOM NGL SPAM</a>
+      <a onclick="page('/app-state?email=&password=')">Appstate Getter</a>
+      <a onclick="page('/scrape?url=')">Web Scraper</a>
+      <a onclick="page('/auto-comment?token=&comment=&postId=&count=')">Auto Comment</a>
+      </div>
+    </li>
+    <li class="folder">
+      <div class="folder-header" onclick="toggleFolder('anime-apis')">
+        <i class="fas fa-star anime-icon"></i> Anime APIs
+      </div>
+      <div class="folder-content" id="anime-apis">
+       <a onclick="page('/anime?q=naruto')">Anime search</a>
+      <a onclick="page('/manga-search?title=naruto')">Manga Search Anime</a>
+      <a onclick="page('hentai?search=anime&amount=10')">18+| hentai Search</a>
+      <a onclick="page('/random/hentai/video/gif')">18+| hentai Random-vid-gif</a>
+      </div>
+      </li>
+      <li class="folder">
+      <div class="folder-header" onclick="toggleFolder('adult-apis')">
+        <i class="fas fa-exclamation-triangle"></i> Adult APIs
+      </div>
+      <div class="folder-content" id="adult-apis">
+      <a onclick="page('/pornhub')">Pornhub</a>
+      <a onclick="page('/pornhubsearch?search=lexi lore')">Pornhubsearch</a>
+      <a onclick="page('/pornhubdownload?url=')">Pornhubdownload</a>
+      <a onclick="page('xvideos')">xvideos</a>
+      <a onclick="page('/xvideosearch?search=lexilore')">xvideosearch</a> 
+      <a onclick="page('/waifu?search=waifu')">waifu</a>
+      <a onclick="page('/hentai-gif')">Hentagif</a>
+      </div>
+    </li>
+    <li class="folder">
+      <div class="folder-header" onclick="toggleFolder('other-apis')">
+        <i class="fas fa-quote-right quote"></i> Other APIs
+      </div>
+      <div class="folder-content" id="other-apis">
+        <a onclick="page('/random-meme')">Random Meme Image</a>
+      <a onclick="page('/convert-text?text=joshua')">Font Converter</a>
+      <a onclick="page('/random-bible-verse')">Random Bible</a>
+      <a onclick="page('/image-emi?prompt=dog')">Emi Image Gen</a>
+      <a onclick="page('pinterest?search=')">Pinterest</a>
+      <a onclick="page('/search/chords?q=walwal')">Chords</a>
+      <a onclick="page('/quote')">Random Quote</a>
+      <a onclick="page('/quotes/v2')">QuotesV2</a>
+      <a onclick="page('/joke')">Random Joke</a>
+      <a onclick="page('/fact')">Fact</a>
+      <a onclick="page('/trivia')">Trivia</a>
+      <a onclick="page('/eduTrivia')">EduTrivia</a>
+      <a href="/wikipedia?search=Albert%20Einstein">Wikipedia</a>
+      <a href="/wikipedia-image-url?search=Albert%20Einstein">Wikipedia Image URL</a>
+      <a href="/search?q=facebook">Google Play Store</a>
+      <a href="/country?code=PH">Country</a>
+      <a onclick="page('/merriam-webster/definition?word=world')">Merriam Webster</a>
+      <a onclick="page('/advice')">Advice</a>
+      <a onclick="page('/gore')">GORE</a>
+      <a onclick="page('/emojimix?one=😮&two=🥺')">Emojimix</a>
+      <a onclick="page('/lyrics?topic=love&style=romantic')">Lyrics</a>
+       <a onclick="page('/dailymotion-video?query=Naruto')">Dailymotion-Video</a>
+      </div>
+    </li>
+    <li class="folder">
+      <div class="folder-header" onclick="toggleFolder('more-apis')">
+        <i class="fas fa-ellipsis-h"></i> More APIs
+      </div>
+      <div class="folder-content" id="more-apis">
+       <a onclick="page('/dog-fact')">Dog Fact</a>
+       <a onclick="page('/number-fact')">Number Fact</a>
+       <a onclick="page('/cat-fact')">Cat Fact</a>
+       <a onclick="page('/random-dog-image')">Random Dog Image</a>
+       <a onclick="page('/dictionary?word=cat')">Dictionary</a>
+        <a onclick="page('/cat-image')">Random Cat Image</a>
+        <a onclick="page('/cocktail')">Coctail</a>
+        <a onclick="page('/gender?name=Joshua')">Genderize</a>
+      </div>
+      </li>
+    <li class="folder">
+      <div class="folder-header" onclick="toggleFolder('links')">
+        <i class="fa-solid fa-link"></i> Links
+      </div>
+      <div class="folder-content" id="links">
+        <a href="learncode.html"><i class="fa-solid fa-code"></i> Learn Code</a>
+        <a href="playstore.html"><i class="fab fa-google-play"></i> PlayStore</a>
+        <a href="API-tester.html"><i class="fas fa-cogs"></i> API Tester</a>
+      </div>
+      <li class="folder">
+      <div class="folder-header" onclick="toggleFolder('facebook')">
+        <i class="fab fa-facebook-f"></i> Contact the Owner
+      </div>
+      <div class="folder-content" id="facebook">
+        <a href="https://www.facebook.com/profile.php?id=100088690249020"><i class="fab fa-facebook-f"></i> Facebook Owner</a>
+      </div>
+    </li>
+  </ul>
+</div>
+<main class="container2">
+  <h2>System Information</h2>
+  <div class="info-section" id="browser_info">
+  </div>
+</main>
+<script>
+let sound = new Howl({
+    src: ["https://files.catbox.moe/il9cy7.mp3"],
+    autoplay: true,
+    loop: true,
+    format: ['mp3'],
+    volume: 1,
+    onend: () => {}
+    });
+    sound.play();
+
+  function page(url) {
+    window.location.href = url;
+  }
+
+  function toggleMenu() {
+    var menu = document.getElementById("menu");
+    var menuIcon = document.getElementById("menuIcon");
+
+    if (menu.classList.contains('show')) {
+      menu.classList.remove('show');
+      setTimeout(() => menu.style.display = 'none', 300);
+      menuIcon.classList.remove('fa-xmark');
+      menuIcon.classList.add('fa-bars');
+    } else {
+      menu.style.display = 'flex';
+      setTimeout(() => menu.classList.add('show'), 10);
+      menuIcon.classList.remove('fa-bars');
+      menuIcon.classList.add('fa-xmark');
+    }
+  }
+
+  function toggleFolder(folderId) {
+    var folderContent = document.getElementById(folderId);
+    var allFolders = document.querySelectorAll('.folder-content');
+
+    allFolders.forEach(function(folder) {
+      if (folder.id !== folderId) {
+        folder.style.maxHeight = '0';
+      }
+    });
+
+    if (folderContent.style.maxHeight === "0px" || folderContent.style.maxHeight === "") {
+      folderContent.style.maxHeight = folderContent.scrollHeight + "px";
+      folderContent.parentElement.classList.add('open');
+    } else {
+      folderContent.style.maxHeight = "0";
+      folderContent.parentElement.classList.remove('open');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+      title: 'Welcome to NASH REST API',
+      text: 'You can create a command for an FBBot or website using the API from this list. Enjoy 😊',
+      imageUrl: 'https://i.imgur.com/Ed5YUaU.png',
+      imageWidth: 130,
+      imageHeight: 170,
+      imageAlt: 'NASH API Logo',
+      customClass: {
+        popup: 'custom-swal-popup',
+        content: 'custom-swal-content',
+        closeButton: 'custom-swal-close',
+        confirmButton: 'swal2-confirm',
+        cancelButton: 'swal2-cancel'
+      }
+    });
+  });
+
+  function createDot() {
+    const dot = document.createElement("div");
+    dot.classList.add("dot");
+    dot.style.animationDelay = `${Math.random() * 5}s`;
+    dot.style.animationDuration = `${3 + Math.random() * 5}s`;
+    dot.style.left = `${Math.random() * 100}vw`;
+    dot.style.top = `${-10 + Math.random() * 5}vh`;
+    document.body.appendChild(dot);
+  }
+
+  for (let i = 0; i < 100; i++) {
+    createDot();
+  }
+
+  let pageLoadTime = localStorage.getItem("pageLoadTime");
+
+  if (pageLoadTime === null) {
+    pageLoadTime = new Date().getTime();
+    localStorage.setItem("pageLoadTime", pageLoadTime);
+  }
+
+  let arrBulan = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+
+  let txt = `
+    <p><b>Browser CodeName</b>: ${navigator.appCodeName}</p>
+    <p><b>Browser Name</b>: ${navigator.appName}</p>
+    <p><b>Cookies Enabled</b>: ${navigator.cookieEnabled}</p>
+    <p><b>Browser Language</b>: ${navigator.language}</p>
+    <p><b>Browser Online</b>: ${navigator.onLine}</p>
+    <p><b>Platform</b>: ${navigator.platform}</p>
+    <p><b>User-agent</b>: ${navigator.userAgent}</p>
+  `;
+
+  let text_el = document.querySelector("div#browser_info");
+
+  setInterval(() => {
+    const uptime = Math.floor((new Date().getTime() - pageLoadTime) / 1000);
+    const hours = Math.floor(uptime / 3600);
+    const remainingSeconds = uptime % 3600;
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+    const oras = `<p><b>Uptime</b>: ${hours}h ${minutes}m ${seconds}s</p>`;
+
+    const d = new Date();
+    const jam = d.getHours().toString().padStart(2, '0');
+    const menit = d.getMinutes().toString().padStart(2, '0');
+    const detik = d.getSeconds().toString().padStart(2, '0');
+    const tgl = d.getDate();
+    const bln = d.getMonth();
+    const thn = d.getFullYear();
+    const bulan = arrBulan[bln];
+
+    text_el.innerHTML = `${txt}${oras}<p><b>Date</b>: ${bulan} ${tgl} ${thn}</p><p><b>Time</b>: ${jam}:${menit}:${detik}</p>`;
+  }, 1000);
+</script>
+</body>
+</html>
