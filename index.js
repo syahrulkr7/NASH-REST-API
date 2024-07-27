@@ -121,7 +121,7 @@ app.get('/gpt3', async (req, res) => {
         const response = await axios.get(`https://joshweb.click/new/gpt-3_5-turbo`, {
             params: { prompt }
         });
-      
+
         const { input, ...responseData } = response.data;
         const modifiedResponse = {
             ...responseData,
@@ -179,7 +179,7 @@ app.get('/freegpt4o8k', async (req, res) => {
   try {
     const response = await axios.get(url);
     let answer = response.data;
-    
+
     if (typeof answer !== 'string') {
       answer = JSON.stringify(answer);
     }
@@ -735,7 +735,7 @@ app.get('/llama-3-70b', async (req, res) => {
     try {
         const response = await axios.get(apiUrl);
         const data = response.data;
-        
+
         data.author = 'NashBot';
 
         res.json({
@@ -758,16 +758,16 @@ const genAI = new GoogleGenerativeAI(apiKey);
 app.get('/gemini', async (req, res) => {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
+
     const prompt = req.query.prompt;
 
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt query parameter is required' });
     }
-    
+
     const result = await model.generateContent(prompt);
     const response = result.response;
-    
+
     res.json({ 
       author: "NashBot",
       response: response.text() 
@@ -825,7 +825,7 @@ app.get('/glm4', async (req, res) => {
             fullResponse += message.answer;
           }
         } catch (err) {
-          
+
         }
       });
 
@@ -857,7 +857,7 @@ app.get('/merriam-webster/definition', async (req, res) => {
     const url = `https://www.merriam-webster.com/dictionary/${word}`;
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
-    
+
     const definitions = [];
     $('.dtText').each((index, element) => {
       definitions.push($(element).text().trim());
@@ -920,7 +920,7 @@ app.get('/scrape', async (req, res) => {
     const response = await axios.get(url);
     const headers = response.headers;
     const $ = cheerio.load(response.data);
-    
+
     const title = $('title').text();
 
     res.json({ headers, title });
@@ -1186,7 +1186,7 @@ app.get('/mistral', async (req, res) => {
     const data = await api.chat("mistralai/Mistral-7B-Instruct-v0.1", messages);
     const aiMessage = data.choices[0].message.content;
     const updatedConversationHistory = [...messages, { role: "assistant", content: aiMessage }];
-    
+
     writeConversationHistory(senderID, updatedConversationHistory);
     res.json({ response: aiMessage });
   } catch (error) {
@@ -1279,7 +1279,7 @@ app.get('/manga-search', async (req, res) => {
     if (!title) {
       return res.status(400).json({ error: 'The title query parameter is required.' });
     }
-    
+
     const response = await axios.get(`https://api.mangadex.org/manga?title=${encodeURIComponent(title)}`);
     const mangaData = response.data.data;
     const manga = mangaData.map(m => ({
@@ -1303,7 +1303,7 @@ const scrapeQuotes = async () => {
         const url = 'https://quotes.toscrape.com';
         const { data } = await axios.get(url);
         const $ = cheerio.load(data);
-        
+
         const quotes = [];
         $('.quote').each((index, element) => {
             const text = $(element).find('.text').text();
@@ -1500,7 +1500,7 @@ app.get('/image-emi', async (req, res) => {
 app.get('/random-bible-verse', async (req, res) => {
     try {
         const response = await axios.get(`https://labs.bible.org/api/?passage=random`);
-        
+
         res.json({ verse: response.data });
     } catch (error) {
         console.error(error);
@@ -1522,7 +1522,7 @@ app.get('/ai-gf', async (req, res) => {
         const response = await axios.get(`https://joshweb.click/api/ai-gf`, {
             params: { q }
         });
-        
+
         const modifiedResponse = { ...response.data, author: 'NashBot' };
 
         res.json(modifiedResponse);
@@ -1560,20 +1560,63 @@ app.get('/convert-text', async (req, res) => {
 //dailymotion-video
 app.get('/dailymotion-video', async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query, limit = 1000 } = req.query;
 
     if (!query) {
       return res.status(400).send('Missing query parameter');
     }
 
-    const response = await axios.get('https://api.dailymotion.com/videos', {
-      params: {
-        fields: 'id,title,url',
-        search: query
+    const maxResults = parseInt(limit, 10);
+    let allVideos = [];
+    let currentPage = 1;
+    const perPage = 10;
+
+    const fetchPage = async (page) => {
+      try {
+        const response = await axios.get('https://api.dailymotion.com/videos', {
+          params: {
+            fields: 'id,title,url',
+            search: query,
+            limit: perPage,
+            page: page
+          }
+        });
+        return response.data.list;
+      } catch (error) {
+        console.error('Error fetching Dailymotion page:', error.message);
+        throw error;
       }
+    };
+
+    while (allVideos.length < maxResults) {
+      const videos = await fetchPage(currentPage);
+
+      if (videos.length > 0) {
+        allVideos = allVideos.concat(videos);
+        currentPage++;
+      } else {
+        break;
+      }
+
+      if (allVideos.length >= maxResults) {
+        break;
+      }
+    }
+
+    const processedVideos = allVideos.map(video => {
+      return {
+        id: video.id,
+        title: video.title,
+        url: video.url,
+        downloadLinks: {
+          sd: `${video.url}?quality=sd`,
+          hd: `${video.url}?quality=hd`,
+          fullhd: `${video.url}?quality=fullhd`
+        }
+      };
     });
 
-    res.json(response.data);
+    res.json(processedVideos.slice(0, maxResults));
   } catch (error) {
     console.error('Error fetching Dailymotion data:', error.message);
     res.status(500).send('Error fetching Dailymotion data');
@@ -1684,7 +1727,7 @@ app.get('/gender', async (req, res) => {
         const response = await axios.get(`https://api.genderize.io`, {
             params: { name }
         });
-        
+
         res.json({
             status: response.data.gender ? 'success' : 'not found',
             name,
