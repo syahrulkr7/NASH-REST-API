@@ -1603,18 +1603,11 @@ app.get('/dailymotion-video', async (req, res) => {
       }
     }
 
-    const processedVideos = allVideos.map(video => {
-      return {
-        id: video.id,
-        title: video.title,
-        url: video.url,
-        downloadLinks: {
-          sd: `${video.url}?quality=sd`,
-          hd: `${video.url}?quality=hd`,
-          fullhd: `${video.url}?quality=fullhd`
-        }
-      };
-    });
+    const processedVideos = allVideos.map(video => ({
+      id: video.id,
+      title: video.title,
+      url: video.url
+    }));
 
     res.json(processedVideos.slice(0, maxResults));
   } catch (error) {
