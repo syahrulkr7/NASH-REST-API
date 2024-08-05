@@ -6,8 +6,9 @@ const path = require('path');
 const cors = require('cors');
 require('dotenv').config();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const dns = require('dns').promises;
+const { performance } = require('perf_hooks');
 const fs = require('fs');
-
 const app = express();
 app.use(cors());
 app.set('json spaces', 4);
@@ -15,6 +16,147 @@ const port = 3000;
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+//gpt3.5
+axios.defaults.baseURL = 'https://ggwp-yyxy.onrender.com/';
+
+app.use(express.json());
+
+app.get('/gpt-3.5_turbo', async (req, res) => {
+  const { prompt } = req.query;
+
+  if (!prompt) {
+    return res.status(400).json({ status: 400, message: 'Prompt is required' });
+  }
+
+  try {
+    const response = await axios.get(`/new/gpt-3_5-turbo`, {
+      params: { prompt }
+    });
+    const data = response.data;
+
+    return res.json({
+      result: {
+        reply: data.result.reply
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: 'An error occurred', error: error.message });
+  }
+});
+
+//checkweb
+const apikey = '254572';
+
+app.get('/checkweb', async (req, res) => {
+  const url = req.query.url;
+
+  if (!url) {
+    return res.status(400).json({ error: 'URL is required' });
+  }
+
+  const start = performance.now();
+
+  try {
+    const response = await axios.get(url);
+    const html = response.data;
+    const $ = cheerio.load(html);
+    const title = $('title').text();
+    const description = $('meta[name="description"]').attr('content') || 'No description available';
+
+    const screenshotURL = `https://api.screenshotmachine.com?key=${apikey}&url=${encodeURIComponent(url)}&dimension=1024x768`;
+
+    const responseTime = performance.now() - start;
+
+    const ipAddress = await dns.lookup(new URL(url).hostname)
+      .then(result => result.address)
+      .catch(() => 'N/A');
+
+    res.json({
+      status: response.status,
+      title,
+      description,
+      screenshotURL,
+      contentLength: response.headers['content-length'] || 'N/A',
+      contentType: response.headers['content-type'] || 'N/A',
+      server: response.headers['server'] || 'N/A',
+      lastModified: response.headers['last-modified'] || 'N/A',
+      httpVersion: response.request.res.httpVersion || 'N/A',
+      responseTime: `${responseTime.toFixed(2)} ms`,
+      ipAddress,
+      redirects: response.request.res.responseUrl || 'N/A',
+      cookies: response.headers['set-cookie'] || 'N/A',
+      cacheControl: response.headers['cache-control'] || 'N/A',
+      eTag: response.headers['etag'] || 'N/A',
+      contentEncoding: response.headers['content-encoding'] || 'N/A',
+      connection: response.headers['connection'] || 'N/A'
+    });
+  } catch (error) {
+    const responseTime = performance.now() - start;
+
+    if (error.response) {
+      res.json({
+        status: error.response.status,
+        title: null,
+        description: null,
+        screenshotURL: null,
+        contentLength: error.response.headers['content-length'] || 'N/A',
+        contentType: error.response.headers['content-type'] || 'N/A',
+        server: error.response.headers['server'] || 'N/A',
+        lastModified: error.response.headers['last-modified'] || 'N/A',
+        httpVersion: error.response.request.res.httpVersion || 'N/A',
+        responseTime: `${responseTime.toFixed(2)} ms`,
+        ipAddress: 'N/A',
+        redirects: error.response.request.res.responseUrl || 'N/A',
+        cookies: error.response.headers['set-cookie'] || 'N/A',
+        cacheControl: error.response.headers['cache-control'] || 'N/A',
+        eTag: error.response.headers['etag'] || 'N/A',
+        contentEncoding: error.response.headers['content-encoding'] || 'N/A',
+        connection: error.response.headers['connection'] || 'N/A'
+      });
+    } else if (error.request) {
+      res.status(502).json({
+        status: 502,
+        title: null,
+        description: null,
+        screenshotURL: null,
+        contentLength: 'N/A',
+        contentType: 'N/A',
+        server: 'N/A',
+        lastModified: 'N/A',
+        httpVersion: 'N/A',
+        responseTime: `${responseTime.toFixed(2)} ms`,
+        ipAddress: 'N/A',
+        redirects: 'N/A',
+        cookies: 'N/A',
+        cacheControl: 'N/A',
+        eTag: 'N/A',
+        contentEncoding: 'N/A',
+        connection: 'N/A'
+      });
+    } else {
+      res.status(500).json({
+        status: 500,
+        title: null,
+        description: null,
+        screenshotURL: null,
+        contentLength: 'N/A',
+        contentType: 'N/A',
+        server: 'N/A',
+        lastModified: 'N/A',
+        httpVersion: 'N/A',
+        responseTime: `${responseTime.toFixed(2)} ms`,
+        ipAddress: 'N/A',
+        redirects: 'N/A',
+        cookies: 'N/A',
+        cacheControl: 'N/A',
+        eTag: 'N/A',
+        contentEncoding: 'N/A',
+        connection: 'N/A'
+      });
+    }
+  }
+});
 
 //spamshare api
 app.get('/share', async (req, res) => {
@@ -107,92 +249,6 @@ app.get('/share', async (req, res) => {
   res.json({ message: 'Sharing process started' });
 });
 
-//gpt3.5 endpoints
-app.get('/gpt3', async (req, res) => {
-    const { prompt } = req.query;
-
-    if (!prompt) {
-        return res.status(400).json({
-            error: 'Please provide a prompt query parameter using the format: /gpt3?prompt=<text>. For example, /gpt3?prompt=hi'
-        });
-    }
-
-    try {
-        const response = await axios.get(`https://joshweb.click/new/gpt-3_5-turbo`, {
-            params: { prompt }
-        });
-
-        const { input, ...responseData } = response.data;
-        const modifiedResponse = {
-            ...responseData,
-            creator: 'NashBot'
-        };
-
-        res.json(modifiedResponse);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'An error occurred while processing your request. Please try again later.' });
-    }
-});
-
-//gpt-3_5-turbo
-app.get('/gpt-3_5-turbo', async (req, res) => {
-    const { prompt } = req.query;
-
-    try {
-        const response = await axios.get('https://joshweb.click/new/gpt-3_5-turbo', {
-            params: { prompt }
-        });
-
-        let data = response.data;
-        data.Credits = 'NashBot';
-
-        const checkPrompt = prompt.toLowerCase();
-        if (checkPrompt.includes('who made you') || checkPrompt.includes('who created you')) {
-            data.result.reply = "I'm created by NashBot. If you want to provide feedback, message this developer: https://www.facebook.com/profile.php?id=100088690249020";
-        }
-
-        res.json({
-            status: 200,
-            Credits: 'NashBot',
-            result: data.result,
-            input: data.input
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: 500,
-            message: 'An error occurred while processing your request.',
-        });
-    }
-});
-
-//freegpt4ok
-app.get('/freegpt4o8k', async (req, res) => {
-  const question = req.query.question;
-
-  if (!question) {
-    return res.status(400).send('Question query parameter is required');
-  }
-
-  const url = `https://api.kenliejugarap.com/freegpt4o8k/?question=${encodeURIComponent(question)}`;
-
-  try {
-    const response = await axios.get(url);
-    let answer = response.data;
-
-    if (typeof answer !== 'string') {
-      answer = JSON.stringify(answer);
-    }
-
-    answer = answer.replace(/Kindly click the link below\\nhttps:\/\/click2donate\.kenliejugarap\.com\\n\(Clicking the link and clicking any ads or button and wait for 30 seconds \(3 times\) everyday is a big donation and help to us to maintain the servers, last longer, and upgrade servers in the future\)/g, '');
-
-    res.json({ answer });
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).send('An error occurred while fetching the response');
-  }
-});
-
 // NGL endpoint
 app.get('/ngl', async (req, res) => {
   const { username, message, deviceId, amount } = req.query;
@@ -220,28 +276,6 @@ app.get('/ngl', async (req, res) => {
     res.status(error.response.status || 500).json({ error: "An error occurred while sending the messages" });
   }
 });
-
-//appstate getter
-app.get('/app-state', async (req, res) => {
-  const email = req.query.email;
-  const password = req.query.password;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password parameters are required' });
-  }
-
-  const url = `https://markdevs-api.onrender.com/api/appstate?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
-
-  try {
-    const response = await axios.get(url);
-    const data = response.data;
-    res.json(data);
-  } catch (error) {
-    console.error('Error:', error.message);
-    res.status(500).json({ error: 'An error occurred while fetching the app state' });
-  }
-});
-
 // Quote endpoint
 app.get('/quote', async (req, res) => {
   try {
@@ -705,52 +739,6 @@ app.get('/blackbox', async (req, res) => {
   }
 });
 
-app.get('/catgpt', async (req, res) => {
-  const { q } = req.query;
-
-  if (!q) {
-    return res.status(400).send('Query parameter is required');
-  }
-
-  try {
-    const response = await axios.get(`https://openapi-idk8.onrender.com/catgpt?q=${encodeURIComponent(q)}`);
-    const data = response.data;
-
-    if (data.author) {
-      data.author = 'NashBot';
-    }
-
-    res.json(data);
-  } catch (error) {
-    console.error('Error:', error.message);
-    res.status(500).send('An error occurred while fetching the data');
-  }
-});
-
-//Llama
-app.get('/llama-3-70b', async (req, res) => {
-    const { q } = req.query;
-    const apiUrl = `https://joshweb.click/api/llama-3-70b?q=${encodeURIComponent(q)}`;
-
-    try {
-        const response = await axios.get(apiUrl);
-        const data = response.data;
-
-        data.author = 'NashBot';
-
-        res.json({
-            status: data.status,
-            author: data.author,
-            result: data.result
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: false,
-            message: 'An error occurred while processing your request.',
-        });
-    }
-});
-
 //gemini
 const apiKey = process.env.API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);
@@ -777,74 +765,6 @@ app.get('/gemini', async (req, res) => {
     res.status(500).json({ error: 'An error occurred while generating content' });
   }
 });
-
-//glm4
-app.get('/glm4', async (req, res) => {
-  try {
-    const url = 'https://udify.app/api/chat-messages';
-    const headers = {
-      'authority': 'udify.app',
-      'accept': '*/*',
-      'accept-language': 'en-US,en;q=0.9',
-      'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlYjQ1NGRjMS1iMzU4LTQ1YzMtOWYwYi1iNzUzMDJkMDBiZmYiLCJzdWIiOiJXZWIgQVBJIFBhc3Nwb3J0IiwiYXBwX2lkIjoiZWI0NTRkYzEtYjM1OC00NWMzLTlmMGItYjc1MzAyZDAwYmZmIiwiYXBwX2NvZGUiOiJQZTg5VHRhWDNyS1hNOE5TIiwiZW5kX3VzZXJfaWQiOiI5YTcyOWRlNC04MWVkLTQ5ZmUtOThiNS1mMWRhNDkxYmIyYWQifQ.kw_x2Ve5JJ9AoeaI4a28yNvFalaXRrrCzYrboeBXYzQ',
-      'content-type': 'application/json',
-      'origin': 'https://udify.app',
-      'referer': 'https://udify.app/chat/Pe89TtaX3rKXM8NS',
-      'sec-ch-ua': '"Not-A.Brand";v="99", "Chromium";v="124"',
-      'sec-ch-ua-mobile': '?1',
-      'sec-ch-ua-platform': '"Android"',
-      'sec-fetch-dest': 'empty',
-      'sec-fetch-mode': 'cors',
-      'sec-fetch-site': 'same-origin',
-      'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36'
-    };
-
-    const queryMessage = req.query.message;
-
-    if (!queryMessage) {
-      return res.status(400).json({ error: 'Message query parameter is required' });
-    }
-
-    const data = {
-      "response_mode": "streaming",
-      "conversation_id": "c3f0f65c-ad40-490a-9ec3-914222b5223c",
-      "query": queryMessage,
-      "inputs": {}
-    };
-
-    const response = await axios.post(url, data, { headers, responseType: 'stream' });
-
-    if (response.status === 200) {
-      let fullResponse = '';
-
-      response.data.on('data', (chunk) => {
-        const decodedLine = chunk.toString('utf-8').replace("data: ", "");
-        try {
-          const message = JSON.parse(decodedLine);
-          if (message.answer) {
-            fullResponse += message.answer;
-          }
-        } catch (err) {
-
-        }
-      });
-
-      response.data.on('end', () => {
-        res.json({ author: 'NashBot', fullResponse });
-      });
-
-      response.data.on('error', (err) => {
-        res.status(500).json({ error: 'An error occurred while processing the stream' });
-      });
-
-    } else {
-      res.status(response.status).send(response.statusText);
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'An error occurred while fetching data' });
-  }
-});
-
 //merriam webster
 app.get('/merriam-webster/definition', async (req, res) => {
   const word = req.query.word;
@@ -1094,128 +1014,6 @@ app.get('/hentai-gif', (req, res) => {
   });
 });
 
-//Mistral
-class NashAPI {
-  constructor() {
-    this.baseUrl = "https://api.endpoints.anyscale.com/v1";
-    this.apiKeys = ["esecret_iyt8cukznmr4lvr26rrc1esfrl", "esecret_qayi6qgc8tjpvdcyl6k1bxujw8", "esecret_z844drr79tdnc5brvg4pnlfjz3"];
-    this.apiKey = this.getKey();
-  }
-
-  getKey() {
-    return this.apiKeys[Math.floor(Math.random() * this.apiKeys.length)];
-  }
-
-  async request(endpoint, method, body = null) {
-    const headers = {
-      Accept: "application/json",
-      Authorization: `Bearer ${this.apiKey}`
-    };
-    if (method === "POST" && body) {
-      headers["Content-Type"] = "application/json";
-    }
-    try {
-      const response = await axios({
-        url: `${this.baseUrl}${endpoint}`,
-        method: method,
-        headers: headers,
-        data: body
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching ${endpoint}:`, error);
-      throw error;
-    }
-  }
-
-  async chat(model, messages, inp = {}) {
-    const body = {
-      model: model || "mistralai/Mistral-7B-Instruct-v0.1",
-      messages: messages || [{
-        role: "system",
-        content: "You are a helpful assistant."
-      }],
-      ...inp
-    };
-    return await this.request("/chat/completions", "POST", body);
-  }
-}
-
-const api = new NashAPI();
-
-const filePath = path.join(__dirname, 'Mistral.json');
-
-if (!fs.existsSync(filePath)) {
-  fs.writeFileSync(filePath, JSON.stringify({}, null, 2));
-}
-
-function readConversationHistory(senderID) {
-  try {
-    const fileData = fs.readFileSync(filePath, 'utf8');
-    const data = JSON.parse(fileData);
-    return data[senderID] || [];
-  } catch (e) {
-    console.error('Error reading conversation history:', e);
-    return [];
-  }
-}
-
-function writeConversationHistory(senderID, conversationHistory) {
-  try {
-    const fileData = fs.readFileSync(filePath, 'utf8');
-    const data = JSON.parse(fileData);
-    data[senderID] = conversationHistory;
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  } catch (e) {
-    console.error('Error saving conversation history:', e);
-  }
-}
-
-app.get('/mistral', async (req, res) => {
-  const prompt = req.query.prompt;
-  const senderID = req.query.senderID;
-
-  if (!prompt || !senderID) {
-    return res.status(400).json({ error: 'Missing prompt or senderID parameter' });
-  }
-
-  const conversationHistory = readConversationHistory(senderID);
-  const messages = [...conversationHistory, { role: "user", content: prompt }];
-
-  try {
-    const data = await api.chat("mistralai/Mistral-7B-Instruct-v0.1", messages);
-    const aiMessage = data.choices[0].message.content;
-    const updatedConversationHistory = [...messages, { role: "assistant", content: aiMessage }];
-
-    writeConversationHistory(senderID, updatedConversationHistory);
-    res.json({ response: aiMessage });
-  } catch (error) {
-    res.status(500).json({ error: 'Error in chat completion' });
-  }
-});
-
-app.get('/codegpt', async (req, res) => {
-    const { type, lang, q } = req.query;
-    const apiUrl = `https://joshweb.click/api/codegpt?type=${type}&lang=${lang}&q=${encodeURIComponent(q)}`;
-
-    try {
-        const response = await axios.get(apiUrl);
-        const data = response.data;
-        data.author = 'NashBot';
-
-        res.json({
-            status: data.status,
-            author: data.author,
-            result: data.result
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: false,
-            message: 'An error occurred while processing your request.',
-        });
-    }
-});
-
 //Anime search
 app.get('/anime', async (req, res) => {
     const { q } = req.query;
@@ -1245,30 +1043,6 @@ app.get('/anime', async (req, res) => {
             status: false,
             message: 'An error occurred while processing your request.',
         });
-    }
-});
-
-//lyrics
-app.get('/lyrics', async (req, res) => {
-    const { topic, style } = req.query;
-
-    const payloads = {
-        topic: topic || null,
-        style: style || null
-    };
-
-    const headers = {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        'Accept': '*/*',
-        'X-Requested-With': 'XMLHttpRequest',
-        'User-Agent': 'ulo'
-    };
-
-    try {
-        const response = await axios.post('https://boredhumans.com/apis/lyrics1_api.php', new URLSearchParams(payloads).toString(), { headers });
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
     }
 });
 
@@ -1419,61 +1193,6 @@ app.get('/random/hentai/video/gif', async (req, res) => {
     res.status(500).json({ message: 'Error fetching data', error: error.message });
   }
 });
-
-//autoreact fb
-app.get('/autoreact', (req, res) => {
-    const { link, type, cookie } = req.query;
-    axios.post("https://flikers.net/android/android_get_react.php", {
-        post_id: link,
-        react_type: type,
-        version: "v1.7"
-    }, {
-        headers: {
-            'User-Agent': "Dalvik/2.1.0 (Linux; U; Android 12; V2134 Build/SP1A.210812.003)",
-            'Connection': "Keep-Alive",
-            'Accept-Encoding': "gzip",
-            'Content-Type': "application/json",
-            'Cookie': cookie
-        }
-    })
-        .then(dat => { res.json(dat.data); })
-        .catch(e => {
-            console.error(e);
-            res.json({ error: 'an error occurred' });
-        });
-});
-
-//token&cookie
-app.get('/api/token-cookie', async (req, res) => {
-    const { username, password } = req.query;
-
-    if (!username || !password) {
-        return res.status(400).json({ status: false, message: 'Username and password are required.' });
-    }
-
-    try {
-        const response = await axios.get(`https://markdevs69-1efde24ed4ea.herokuapp.com/api/token&cookie`, {
-            params: {
-                username,
-                password
-            }
-        });
-
-        if (response.data.status) {
-            res.json({
-                status: true,
-                message: 'Information retrieved successfully!',
-                data: response.data.data
-            });
-        } else {
-            res.status(500).json({ status: false, message: 'Failed to retrieve information.' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: false, message: 'An error occurred while processing your request.' });
-    }
-});
-
 //image-emi
 app.get('/image-emi', async (req, res) => {
     const { prompt } = req.query;
@@ -1505,30 +1224,6 @@ app.get('/random-bible-verse', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'An error occurred while processing your request.' });
-    }
-});
-
-//AI Girlfriend (PRO)
-app.get('/ai-gf', async (req, res) => {
-    const { q } = req.query;
-
-    if (!q) {
-        return res.status(400).json({
-            error: 'Please provide a query parameter using the format: /ai-gf?q=<text>. For example, /ai-gf?q=hello'
-        });
-    }
-
-    try {
-        const response = await axios.get(`https://joshweb.click/api/ai-gf`, {
-            params: { q }
-        });
-
-        const modifiedResponse = { ...response.data, author: 'NashBot' };
-
-        res.json(modifiedResponse);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'An error occurred while processing your request. Please try again later.' });
     }
 });
 
@@ -1868,6 +1563,21 @@ app.get('/ngl', async (req, res) => {
     }
     res.status(error.response ? error.response.status : 500).json({ error: "An error occurred while sending the messages" });
   }
+});
+
+//ss-site
+const API_KEY = '254572';
+
+app.get('/screenshot', (req, res) => {
+  const url = req.query.url;
+
+  if (!url) {
+    return res.status(400).json({ error: 'URL is required' });
+  }
+
+  const screenshotURL = `https://api.screenshotmachine.com?key=${API_KEY}&url=${encodeURIComponent(url)}&dimension=1024x768`;
+
+  res.json({ screenshotURL });
 });
 
 app.listen(port, () => {
