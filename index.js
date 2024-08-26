@@ -17,6 +17,30 @@ const port = 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//llama
+app.get('/llama-3-70b', async (req, res) => {
+    const { q } = req.query;
+    const apiUrl = `https://deku-rest-api.gleeze.com/api/llama-3-70b?q=${encodeURIComponent(q)}`;
+
+    try {
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+        
+        data.author = 'NashBot';
+
+        res.json({
+            status: data.status,
+            author: data.author,
+            result: data.result
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: false,
+            message: 'An error occurred while processing your request.',
+        });
+    }
+});
+
 //gpt3.5
 axios.defaults.baseURL = 'https://ggwp-yyxy.onrender.com/';
 
