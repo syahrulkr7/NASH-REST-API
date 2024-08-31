@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
+const Groq = require('groq-sdk');
 const cheerio = require('cheerio');
 const path = require('path');
 const cors = require('cors');
@@ -17,32 +18,134 @@ const port = 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//llama
-app.get('/llama-3-70b', async (req, res) => {
-    const { q } = req.query;
-    const apiUrl = `https://deku-rest-api.gleeze.com/api/llama-3-70b?q=${encodeURIComponent(q)}`;
+//llama3-8b-8192 
+const groq = new Groq({ apiKey: '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' });
 
-    try {
-        const response = await axios.get(apiUrl);
-        const data = response.data;
-        
-        data.author = 'NashBot';
+app.get('/Llama', async (req, res) => {
+  try {
+    const query = req.query.q;
 
-        res.json({
-            status: data.status,
-            author: data.author,
-            result: data.result
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: false,
-            message: 'An error occurred while processing your request.',
-        });
-    }
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: query,
+        },
+      ],
+      model: 'llama3-8b-8192',
+    });
+
+    res.json({
+      response: chatCompletion.choices[0]?.message?.content || "Walang natanggap na sagot.",
+    });
+  } catch (error) {
+    console.error('Error fetching chat completion:', error);
+    res.status(500).json({ error: 'Nabigong makuha ang sagot.' });
+  }
+});
+
+//mixtral convertional
+const CONVERSATION_FILE = path.join(__dirname, 'mixtral.json');
+
+app.use(express.json());
+
+const loadConversations = () => {
+  if (fs.existsSync(CONVERSATION_FILE)) {
+    return JSON.parse(fs.readFileSync(CONVERSATION_FILE, 'utf8'));
+  }
+  return {};
+};
+
+const saveConversations = (conversations) => {
+  fs.writeFileSync(CONVERSATION_FILE, JSON.stringify(conversations, null, 2), 'utf8');
+};
+
+app.get('/Mixtral', async (req, res) => {
+  const userId = req.query.userId;
+  const message = req.query.message;
+
+  if (!userId || !message) {
+    return res.status(400).json({ error: 'User ID and message are required.' });
+  }
+
+  const conversations = loadConversations();
+
+  if (message.toLowerCase() === 'clear') {
+    delete conversations[userId];
+    saveConversations(conversations);
+    return res.json({ response: 'Conversation cleared.' });
+  }
+
+  const history = conversations[userId] || [];
+
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        ...history,
+        {
+          role: 'user',
+          content: message,
+        },
+      ],
+      model: 'mixtral-8x7b-32768',
+    });
+
+    const newMessage = chatCompletion.choices[0]?.message?.content || 'No response received.';
+    conversations[userId] = [
+      ...history,
+      {
+        role: 'user',
+        content: message,
+      },
+      {
+        role: 'assistant',
+        content: newMessage,
+      },
+    ];
+
+    saveConversations(conversations);
+
+    res.json({
+      response: newMessage,
+    });
+  } catch (error) {
+    console.error('Error fetching chat completion:', error);
+    res.status(500).json({ error: 'Failed to fetch response.' });
+  }
+});
+
+//gemma-7b-it
+app.get('/gemma', async (req, res) => {
+  const prompt = req.query.prompt;
+
+  if (!prompt) {
+    return res.status(400).json({ error: 'Prompt is required.' });
+  }
+
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      model: 'gemma-7b-it',
+    });
+
+    const responseMessage = chatCompletion.choices[0]?.message?.content || 'No response received.';
+
+    res.json({
+      response: responseMessage,
+    });
+  } catch (error) {
+    console.error('Error fetching chat completion:', error);
+    res.status(500).json({ error: 'Failed to fetch response.' });
+  }
 });
 
 //gpt3.5
-axios.defaults.baseURL = 'https://ggwp-yyxy.onrender.com/';
+axios.defaults.baseURL = 'https://deku-rest-api.gleeze.com';
 
 app.use(express.json());
 
@@ -1541,6 +1644,7 @@ function getRandomDeviceId() {
   return 'device-' + Math.random().toString(36).substr(2, 9);
 }
 
+//ngl
 app.get('/ngl', async (req, res) => {
   const { username, category, amount } = req.query;
   let { deviceId } = req.query;

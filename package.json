@@ -49,6 +49,7 @@
     "function-bind": "^1.1.2",
     "get-intrinsic": "^1.2.4",
     "gopd": "^1.0.1",
+    "groq-sdk": "^0.6.1",
     "has-property-descriptors": "^1.0.2",
     "has-proto": "^1.0.3",
     "has-symbols": "^1.0.3",
