@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const Groq = require('groq-sdk');
+const fuzz = require('fuzzball');
 const cheerio = require('cheerio');
 const path = require('path');
 const cors = require('cors');
@@ -138,6 +139,91 @@ app.get('/gemma', async (req, res) => {
     res.json({
       response: responseMessage,
     });
+  } catch (error) {
+    console.error('Error fetching chat completion:', error);
+    res.status(500).json({ error: 'Failed to fetch response.' });
+  }
+});
+
+//nashbot
+const selfRecognitionPatterns = [
+  "can you tell me about nash",
+  "what is nash",
+  "who are you",
+  "what do you do",
+  "tell me about yourself",
+  "what's your name",
+  "describe yourself",
+  "what are you",
+  "how do you work",
+  "what can you do",
+  "who is nash",
+  "what does nash do",
+  "give me information about nash",
+  "introduce yourself"
+];
+
+const selfRecognitionResponses = [
+  "I am Nash, a chatbot designed to assist with your queries and provide information.",
+  "Hello! I'm Nash. My purpose is to help with any questions you might have.",
+  "I'm Nash, your virtual assistant here to help with a variety of tasks and information.",
+  "Nash at your service! Feel free to ask me anything or let me know how I can assist you.",
+  "I’m Nash, and I'm here to assist with your questions and provide support.",
+  "Hi there! I’m Nash, a chatbot ready to help you with any information you need.",
+  "I am Nash, and I’m here to answer your questions and provide useful information.",
+  "Nash is my name, and I’m here to help you with any questions or concerns.",
+  "I'm Nash, and I'm here to offer assistance and information as needed.",
+  "Nash is my name, and I’m here to assist with any inquiries you might have."
+];
+
+const analyzePrompt = (prompt) => {
+  const promptLower = prompt.toLowerCase();
+  let bestMatchScore = 0;
+  let bestMatchResponse = null;
+
+  for (const pattern of selfRecognitionPatterns) {
+    const score = fuzz.partial_ratio(promptLower, pattern.toLowerCase());
+    if (score > bestMatchScore) {
+      bestMatchScore = score;
+      if (score > 85) {
+        bestMatchResponse = selfRecognitionResponses[
+          Math.floor(Math.random() * selfRecognitionResponses.length)
+        ];
+      }
+    }
+  }
+
+  return bestMatchResponse;
+};
+
+app.get('/nashbot', async (req, res) => {
+  const prompt = req.query.prompt;
+
+  if (!prompt) {
+    return res.status(400).json({ error: 'Prompt is required.' });
+  }
+
+  const selfRecognitionResponse = analyzePrompt(prompt);
+
+  if (selfRecognitionResponse) {
+    return res.json({ response: selfRecognitionResponse });
+  }
+
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: 'user', content: prompt },
+      ],
+      model: 'mixtral-8x7b-32768',
+    });
+
+    const originalMessage = chatCompletion.choices[0]?.message?.content || 'No response received.';
+    const modifiedMessage = originalMessage
+      .replace(/Mistral AI/g, 'Nash Team')
+      .replace(/BlenderBot 3/g, 'NashBot Ai')
+      .replace(/Facebook AI/g, 'Nash Team');
+
+    res.json({ response: modifiedMessage });
   } catch (error) {
     console.error('Error fetching chat completion:', error);
     res.status(500).json({ error: 'Failed to fetch response.' });
