@@ -230,6 +230,30 @@ app.get('/nashbot', async (req, res) => {
   }
 });
 
+//llava
+app.get('/llava', async (req, res) => {
+  try {
+    const query = req.query.q;
+
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: query,
+        },
+      ],
+      model: 'llava-v1.5-7b-4096-preview',
+    });
+
+    res.json({
+      response: chatCompletion.choices[0]?.message?.content || "No response received.",
+    });
+  } catch (error) {
+    console.error('Error fetching chat completion:', error);
+    res.status(500).json({ error: 'Failed to fetch response.' });
+  }
+});
+
 //gpt3.5
 axios.defaults.baseURL = 'https://deku-rest-api.gleeze.com';
 
